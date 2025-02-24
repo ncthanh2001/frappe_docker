@@ -1,0 +1,33 @@
+    DOCKER
+
+
+export APPS_JSON_BASE64=$(base64 -w 0 apps.json)
+echo -n ${APPS_JSON_BASE64} | base64 -d > apps-test-output.json
+echo $APPS_JSON_BASE64
+
+
+ docker build   --build-arg=FRAPPE_PATH=https://github.com/frappe/frappe   --build-arg=FRAPPE_BRANCH=version-15   --build-arg=PYTHON_VERSION=3.11.9   --build-arg=NODE_VERSION=18.20.2   --build-arg=APPS_JSON_BASE64=$APPS_JSON_BASE64   --tag=tutorial_frappe_docker  --file=images/custom/Containerfile .
+
+ sed -i "s|frappe/erpnext:v15.52.0|tutorial_frappe_docker|g" pwd.yml
+ sed -i "s|networks:|platform: linux/amd64\nnetworks:|g" pwd.yml
+ sed -i "s|networks:|\tnetworks:|g" pwd.yml
+
+xoá cache:  pip cache purge
+
+ docker compose -f pwd.yml up -d
+
+uname -m
+platform: linux/arm64
+platform: linux/amd64
+
+
+vào cmd của docker container :  docker exec -it frappe_docker-backend-1 bash
+
+Hành động	Lệnh
+Dừng tất cả containers	docker stop $(docker ps -aq)
+Xóa tất cả containers	docker rm $(docker ps -aq)
+Xóa tất cả images	docker rmi -f $(docker images -aq)
+Xóa tất cả volumes	docker volume rm $(docker volume ls -q)
+Xóa tất cả networks	docker network rm $(docker network ls -q)
+Dọn dẹp hệ thống	docker system prune -a --volumes
+Xóa hoàn toàn Docker	sudo apt remove --purge docker* -y && sudo rm -rf /var/lib/docker
